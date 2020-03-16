@@ -705,9 +705,32 @@ void determine_row_and_col_chosen_by_second_click(Map & map, int mouse_x, int mo
 			}
 }
 
+
+bool is_place_taken(Elements & elements, int row, int col){
+	for(int i=0; i<elements.peashooters.size(); i++){
+		if(elements.peashooters[i].row == row && elements.peashooters[i].col == col)
+		return true;
+	}
+	for(int i=0; i<elements.walnuts.size(); i++){
+		if(elements.walnuts[i].row == row && elements.walnuts[i].col == col)
+		return true;
+	}
+	for(int i=0; i<elements.sunflowers.size(); i++){
+		if(elements.sunflowers[i].row == row && elements.sunflowers[i].col == col)
+		return true;
+	}
+
+
+	return false;
+}
+
+
 void create_new_plant(Player & player, Map & map, Elements & elements, Icons & icons, int mouse_x, int mouse_y){
 	int row, col;
 	determine_row_and_col_chosen_by_second_click(map, mouse_x, mouse_y, row, col);
+	if(is_place_taken(elements,row,col)){
+		return;
+	}
 	if (icons.is_sunflower_chosen && player.sun_count >= 50){
 		Sunflower temp; 
 		temp.row = row; temp.col = col;
