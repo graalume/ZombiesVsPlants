@@ -1,10 +1,10 @@
-//In the name of God
+
 #include <iostream>
 #include <vector>
 #include <string>
 #include <fstream>
 #include <stdlib.h>
-#include <time.h> 
+#include <time.h>
 #include "rsdl.hpp"
 
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
@@ -14,7 +14,7 @@
 #define SUN_GEN_SUNFLOWER_CLK_COUNT 4000
 #define ZOMBIE_CREATE_CLK_COUNT 1200
 #define FIRE_PEA_CLK_COUNT 300
-#define BYTE_CLK_COUNT 100 
+#define BYTE_CLK_COUNT 100
 #define ZOMBIE_CLK_COUNT 22
 #define SUN_CLK_COUNT 8
 #define PEA_CLK_COUNT 4
@@ -43,7 +43,7 @@
 #define HORIZ_BLOCK_COUNT 9
 #define VERT_BLOCK_COUNT 5
 
-#define X_UPPER_LEFT 250 
+#define X_UPPER_LEFT 250
 #define Y_UPPER_LEFT 70
 #define TAP_TO_START_X1 230
 #define TAP_TO_START_X2 796
@@ -260,7 +260,7 @@ bool has_player_won(Level & level, Elements & elements);
 
 void handle_changes(Elements & elements, Map & map, Level & level, int clk){
 	update_moving_status_for_zombies(elements, map);
-	
+
 	handle_pea_zombie_encounter(elements, map);
 	if (level.waves_finished == false && clk % ZOMBIE_CREATE_CLK_COUNT == 0)
 		create_new_zombies(elements, level);
@@ -421,9 +421,9 @@ void create_new_zombies(Elements & elements, Level & level){
 			level.cur_sec = 0;
 			level.cur_wave ++;
 		}
-		else 
+		else
 			level.waves_finished = true;
-	}	
+	}
 }
 
 bool are_there_zombies_in_peashooter_row(Peashooter peashooter, Elements & elements){
@@ -443,11 +443,11 @@ void remove_suns(Elements & elements){
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
 void handle_movements(Elements & elements, Map & map, int clk){
-	if (clk % ZOMBIE_CLK_COUNT == 0)	
+	if (clk % ZOMBIE_CLK_COUNT == 0)
 		move_zombies(elements.zombies, elements, map);
-	if (clk % SUN_CLK_COUNT == 0)	
+	if (clk % SUN_CLK_COUNT == 0)
 		move_suns(elements.suns, map);
-	if (clk % PEA_CLK_COUNT == 0)	
+	if (clk % PEA_CLK_COUNT == 0)
 		move_peas(elements.peas, elements, map);
 }
 
@@ -458,7 +458,7 @@ void move_suns(vector<Sun> & suns, Map & map){
 		int lower_limit = map[row][col].y1 + 30;
 		if (suns[i].y_location + SUN_DY < lower_limit)
 			suns[i].y_location += SUN_DY;
-		else 
+		else
 			suns[i].wait_seconds ++;
 	}
 }
@@ -478,7 +478,7 @@ bool has_zombie_reached_element(Zombie zombie, int row, int col, Map & map){
 		zombie_new_location < right_limit &&
 		zombie_new_location > left_limit)
 		return true;
-	return false;	
+	return false;
 }
 
 bool can_pea_move(Pea & pea, Elements & elements, Map & map){
@@ -616,7 +616,7 @@ void display_peas(window & win, vector<Pea> & peas, Map & map){
 	for (int i = 0; i < peas.size(); i++){
 		int row = peas[i].row;
 		int y_location = map[row][0].y1 + 20;
-		if (peas[i].x_location < (map[0][8].x2 - 35))	
+		if (peas[i].x_location < (map[0][8].x2 - 35))
 			win.draw_png(PEA_DIRECTORY, peas[i].x_location, y_location, PEA_WIDTH, PEA_HEIGHT);
 	}
 }
@@ -671,7 +671,7 @@ void determine_icon_chosen(Icons & icons, int mouse_y){
 	icons.is_sunflower_chosen = false;
 	if (mouse_y > SUNFLOWER_ICON_Y1 && mouse_y < SUNFLOWER_ICON_Y1 + ICON_HEIGHT)
 		icons.is_sunflower_chosen = true;
-	else if (mouse_y > PEASHOOTER_100_ICON_Y1 && 
+	else if (mouse_y > PEASHOOTER_100_ICON_Y1 &&
 		mouse_y < PEASHOOTER_100_ICON_Y1 + ICON_HEIGHT)
 		icons.is_peashooter_chosen = true;
 	else
@@ -699,11 +699,34 @@ void determine_row_and_col_chosen_by_second_click(Map & map, int mouse_x, int mo
 			}
 }
 
+
+bool is_place_taken(Elements & elements, int row, int col){
+	for(int i=0; i<elements.peashooters.size(); i++){
+		if(elements.peashooters[i].row == row && elements.peashooters[i].col == col)
+		return true;
+	}
+	for(int i=0; i<elements.walnuts.size(); i++){
+		if(elements.walnuts[i].row == row && elements.walnuts[i].col == col)
+		return true;
+	}
+	for(int i=0; i<elements.sunflowers.size(); i++){
+		if(elements.sunflowers[i].row == row && elements.sunflowers[i].col == col)
+		return true;
+	}
+
+
+	return false;
+}
+
+
 void create_new_plant(Player & player, Map & map, Elements & elements, Icons & icons, int mouse_x, int mouse_y){
 	int row, col;
 	determine_row_and_col_chosen_by_second_click(map, mouse_x, mouse_y, row, col);
+	if(is_place_taken(elements,row,col)){
+		return;
+	}
 	if (icons.is_sunflower_chosen && player.sun_count >= 50){
-		Sunflower temp; 
+		Sunflower temp;
 		temp.row = row; temp.col = col;
 		temp.byte = 0;
 		elements.sunflowers.push_back(temp);
@@ -879,7 +902,7 @@ void decide_zombie_cnt_for_each_sec(Level & level){
 			if (enough_zombies)
 				temp.push_back(0);
 
-			else {	
+			else {
 				if (z_cnt + sum <= level.wave_zombie_count[wave])
 					temp.push_back(z_cnt);
 				else {
@@ -901,7 +924,7 @@ void desplay_starting_screen(window & win){
 			QUIT(quit = true);
 			KEY_PRESS(q, quit = true);
 			LCLICK({
-				if (user_clicked_on_start(mouse_x, mouse_y))	
+				if (user_clicked_on_start(mouse_x, mouse_y))
 					game_started = true;
 			});
 		);
@@ -949,7 +972,7 @@ int main(){
 	init_game(win, level, player, map);
 
 	while(!quit){
-		
+
 		if (has_player_lost(game_characters))
 			display_losing_message(win);
 		else if (has_player_won(level, game_characters))
@@ -975,4 +998,3 @@ int main(){
 	}
 	return 0;
 }
-
